@@ -24,20 +24,23 @@ volatile bool estado_botao = false;
 // comportamento do semáforo
 void semaforo(int vermelho, int amarelo, int verde, int pedestre, int buzzer){
   gpio_put(verde, 1);
-  sleep_ms(8000);
+  sleep_ms(5000);
   gpio_put(verde, 0);
-  gpio_put(amarelo, 1);
-  sleep_ms(2000);
-  gpio_put(amarelo, 0);
   //verifica o estado do botão antes da transição do vermelho para confirmar se o botão foi pressionado
   if(estado_botao == false){
+    gpio_put(amarelo, 1);
+    sleep_ms(2000);
+    gpio_put(amarelo, 0);
     gpio_put(vermelho, 1);
     sleep_ms(10000);
     gpio_put(vermelho, 0);
   }else{
+    gpio_put(amarelo, 1);
+    sleep_ms(5000);
+    gpio_put(amarelo, 0);
     gpio_put(vermelho, 1);
     gpio_put(pedestre, 1);
-    beeps(buzzer, 10);
+    beeps(buzzer, 1500, 15000);
     gpio_put(pedestre, 0);
     gpio_put(vermelho, 0);
     estado_botao = false;
@@ -61,23 +64,23 @@ void pwm_init_buzzer(uint pin) {
 }
 
 // Definição de uma função para emitir beeps com duração especificada
-void beeps(uint pin, uint duration_s) {
+void beeps(uint pin, uint ciclo_ms, uint duracao_ms) {
   // Obter o slice do PWM associado ao pino
   uint slice_num = pwm_gpio_to_slice_num(pin);
 
   // Varia o estado do buzzer com a duracao em s especificada
-  for(int i = 0; i < duration_s/2; i++ ){
+  for(int i = 0; i < duracao_ms; i = i + ciclo_ms){
     // Configurar o duty cycle para 50% (ativo)
     pwm_set_gpio_level(pin, 2048);
 
     // Temporização
-    sleep_ms(1000);
+    sleep_ms(ciclo_ms/2);
 
     // Desativar o sinal PWM (duty cycle 0)
     pwm_set_gpio_level(pin, 0);
 
     // Pausa entre os beeps
-    sleep_ms(1000); // Pausa de 100ms
+    sleep_ms(ciclo_ms/2);
   }
 
 }
